@@ -5,6 +5,29 @@ const fs = require("fs");
 // Carregar respostas do arquivo JSON
 const respostas = JSON.parse(fs.readFileSync("./respostas.json", "utf-8"));
 
+// Carregar contatos já atendidos; se não existir, cria
+const contatosPath = "./contatos.json";
+if (!fs.existsSync(contatosPath)) {
+  fs.writeFileSync(contatosPath, JSON.stringify({ contatos: [] }, null, 2));
+}
+let contatosKnown = JSON.parse(fs.readFileSync(contatosPath, "utf-8"));
+
+function salvarContatos() {
+  fs.writeFileSync(contatosPath, JSON.stringify(contatosKnown, null, 2));
+}
+
+function ehContatoNovo(numeroWhatsapp) {
+  return !contatosKnown.contatos.includes(numeroWhatsapp);
+}
+
+function registrarContato(numeroWhatsapp) {
+  if (!contatosKnown.contatos.includes(numeroWhatsapp)) {
+    contatosKnown.contatos.push(numeroWhatsapp);
+    salvarContatos();
+    console.log(`📝 Novo contato registrado: ${numeroWhatsapp}`);
+  }
+}
+
 // Inicializar cliente
 const client = new Client({
   authStrategy: new LocalAuth(),
@@ -28,6 +51,28 @@ client.on("ready", async () => {
   console.log("✅ Bot conectado e pronto!");
   console.log("⏰ Aguardando mensagens...");
 
+  // Pré-carregar contatos que já têm histórico para não responder
+  try {
+    const chats = await client.getChats();
+    const idsExistentes = chats
+      .filter((c) => !c.isGroup)
+      .map((c) => c.id?._serialized)
+      .filter(Boolean);
+    const novos = idsExistentes.filter(
+      (id) => !contatosKnown.contatos.includes(id),
+    );
+    if (novos.length) {
+      contatosKnown.contatos.push(...novos);
+      salvarContatos();
+      console.log(`📚 Contatos existentes carregados: ${novos.length}`);
+    }
+  } catch (e) {
+    console.log(
+      "⚠️ Não foi possível pré-carregar chats existentes:",
+      e.message,
+    );
+  }
+
   // Desabilitar a função que tenta marcar como lido
   try {
     await client.pupPage.evaluate(() => {
@@ -47,6 +92,12 @@ client.on("ready", async () => {
 client.on("message_create", async (message) => {
   // Ignorar mensagens de grupos, do próprio bot e sem conteúdo
   if (message.from.includes("@g.us") || message.fromMe || !message.body) {
+    return;
+  }
+
+  // Ignorar quem já conversou antes
+  if (!ehContatoNovo(message.from)) {
+    console.log(`⏭️ Ignorando ${message.from}: contato já existente.`);
     return;
   }
 
@@ -79,12 +130,14 @@ client.on("message_create", async (message) => {
   try {
     await client.sendMessage(message.from, respostaEncontrada);
     console.log(`✅ Resposta enviada para ${message.from}`);
+    registrarContato(message.from);
   } catch (error) {
     // Se o erro for relacionado a markedUnread, ainda assim a mensagem pode ter sido enviada
     if (error.message.includes("markedUnread")) {
       console.log(
         `✅ Resposta enviada para ${message.from} (apesar do aviso interno)`,
       );
+      registrarContato(message.from);
     } else {
       console.error("❌ Erro ao enviar:", error.message);
     }

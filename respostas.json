@@ -1,32 +1,16 @@
 {
-  "comandos": {
-    "oi": "Olá! 👋 Bem-vindo ao nosso atendimento automático.\n\nDigite:\n1️⃣ - Horário de funcionamento\n2️⃣ - Endereço\n3️⃣ - Serviços\n4️⃣ - Contato\n5️⃣ - Formas de pagamento",
-    "olá": "Olá! 👋 Bem-vindo ao nosso atendimento automático.\n\nDigite:\n1️⃣ - Horário de funcionamento\n2️⃣ - Endereço\n3️⃣ - Serviços\n4️⃣ - Contato\n5️⃣ - Formas de pagamento",
-    "ola": "Olá! 👋 Bem-vindo ao nosso atendimento automático.\n\nDigite:\n1️⃣ - Horário de funcionamento\n2️⃣ - Endereço\n3️⃣ - Serviços\n4️⃣ - Contato\n5️⃣ - Formas de pagamento",
-    "menu": "📋 MENU PRINCIPAL\n\nDigite:\n1️⃣ - Horário de funcionamento\n2️⃣ - Endereço\n3️⃣ - Serviços\n4️⃣ - Contato\n5️⃣ - Formas de pagamento",
-    "1": "🕐 *HORÁRIO DE FUNCIONAMENTO*\n\nSegunda a Sexta: 8h às 18h\n\nDigite *menu* para voltar ao início.",
-    "2": "📍 *NOSSO ENDEREÇO*\n\nRua Exemplo, 123\nCentro - Cidade/UF\nCEP: 12345-678\n\n📱 WhatsApp: (11) 99999-9999\n\nDigite *menu* para voltar ao início.",
-    "3": "⚙️ *NOSSOS SERVIÇOS*\n\n• Serviço A\n• Serviço B\n• Serviço C\n• Serviço D\n\nPara mais informações, entre em contato conosco!\n\nDigite *menu* para voltar ao início.",
-    "4": "📞 *CONTATO*\n\n📱 WhatsApp: (11) 99999-9999\n📧 Email: contato@exemplo.com.br\n🌐 Site: www.exemplo.com.br\n📸 Instagram: @exemplo\n\nDigite *menu* para voltar ao início.",
-    "5": "💳 *FORMAS DE PAGAMENTO*\n\nAceitamos:\n✅ Dinheiro\n✅ PIX\n✅ Cartão de Débito\n✅ Cartão de Crédito (até 3x)\n\nDigite *menu* para voltar ao início."
+  "saudacao": "Olá! 👋 Seja bem-vindo(a) a Itales, me conte mais o que você busca!\n\n📋 MENU PRINCIPAL\n\nDigite:\n1️⃣ - Relógios\n2️⃣ - Imóveis\n3️⃣ - Veículos\n4️⃣ - Investimentos\n",
+  "categorias": {
+    "1": "🕐 Relógios",
+    "2": "🏠 Imóveis",
+    "3": "🚗 Veículos",
+    "4": "💰 Investimentos"
   },
-  "palavrasChave": {
-    "horário": "🕐 Funcionamos de Segunda a Sexta das 8h às 18h, e Sábado das 8h às 12h.",
-    "horario": "🕐 Funcionamos de Segunda a Sexta das 8h às 18h, e Sábado das 8h às 12h.",
-    "abre": "🕐 Abrimos às 8h de Segunda a Sábado.",
-    "fecha": "🕐 Fechamos às 18h durante a semana e às 12h aos sábados.",
-    "endereço": "📍 Rua Exemplo, 123 - Centro - Cidade/UF - CEP: 12345-678",
-    "endereco": "📍 Rua Exemplo, 123 - Centro - Cidade/UF - CEP: 12345-678",
-    "onde": "📍 Estamos na Rua Exemplo, 123 - Centro.",
-    "preço": "💰 Para informações sobre preços, entre em contato conosco pelo telefone (11) 99999-9999",
-    "preco": "💰 Para informações sobre preços, entre em contato conosco pelo telefone (11) 99999-9999",
-    "valor": "💰 Para informações sobre valores, entre em contato conosco pelo telefone (11) 99999-9999",
-    "pix": "✅ Sim! Aceitamos PIX como forma de pagamento.",
-    "cartão": "✅ Aceitamos cartão de débito e crédito (até 3x sem juros).",
-    "cartao": "✅ Aceitamos cartão de débito e crédito (até 3x sem juros).",
-    "obrigado": "Por nada! 😊 Estamos à disposição. Digite *menu* se precisar de mais alguma coisa!",
-    "obrigada": "Por nada! 😊 Estamos à disposição. Digite *menu* se precisar de mais alguma coisa!",
-    "valeu": "Por nada! 😊 Digite *menu* se precisar de mais informações!"
+  "pergunta_valor": "Qual o valor do bem que você deseja adquirir?",
+  "pergunta_disponibilidade": "Você tem disponibilidade para atendermos no momento ou prefere agendar um horário?",
+  "opcoes_disponibilidade": {
+    "agora": "Ótimo! Nossa equipe entrará em contato em breve para atendê-lo(a).",
+    "agendar": "Perfeito! Qual horário você prefere agendar uma conversa com nossa equipe?"
   },
-  "respostaPadrao": "Desculpe, não entendi sua mensagem. 😕\n\nDigite *menu* para ver as opções disponíveis ou entre em contato pelo telefone (11) 99999-9999 para falar com um atendente."
+  "respostaPadrao": "Desculpe, não entendi sua mensagem. 😕\n\nDigite *menu* para voltar ao menu principal."
 }

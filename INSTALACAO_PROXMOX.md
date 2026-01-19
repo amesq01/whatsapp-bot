@@ -216,6 +216,8 @@ Você verá:
 ███████████████████████████
 ```
 
+------ FUNCIONOU PRA MIM, APARECEU O QR CODE ---------------------------------------------
+
 **⚠️ PROBLEMA:** Não dá para escanear QR Code no terminal remoto!
 
 **SOLUÇÕES:**

@@ -71,18 +71,21 @@ chatbot/
 ### Descrição dos Arquivos
 
 **`bot.js`**
+
 - Motor principal do bot
 - Gerencia conexão com WhatsApp Web
 - Implementa máquina de estados
 - Controla o fluxo conversacional
 
 **`respostas.json`**
+
 - Configuração de todas as mensagens
 - Define categorias de produtos/serviços
 - Perguntas do fluxo
 - Respostas personalizadas
 
 **`estados_contatos.json`** (gerado automaticamente)
+
 - Rastreia em qual etapa cada contato está
 - Estados possíveis:
   - `aguardando_categoria` - Esperando escolha de produto
@@ -92,6 +95,7 @@ chatbot/
   - `finalizado` - Atendimento concluído
 
 **`contatos.json`**
+
 - Lista de contatos que já foram atendidos
 - Bot não responde contatos desta lista
 
@@ -106,11 +110,13 @@ chatbot/
 ### Passo a Passo
 
 1. **Instale as dependências:**
+
 ```bash
 npm install
 ```
 
 2. **Inicie o bot:**
+
 ```bash
 npm start
 ```
@@ -159,6 +165,7 @@ echo '{}' > estados_contatos.json
 ### Adicionar Mais Categorias
 
 1. Adicione no `respostas.json`:
+
 ```json
 "categorias": {
   "1": "Relógios",
@@ -172,6 +179,7 @@ echo '{}' > estados_contatos.json
 2. Atualize a saudação com a nova opção
 
 3. Adicione a validação no `bot.js`:
+
 ```javascript
 if (["1", "2", "3", "4", "5"].includes(textoUsuario)) {
 ```
@@ -206,6 +214,7 @@ O bot exibe logs detalhados no terminal:
 ### Bot não responde mensagens
 
 **Verifique:**
+
 1. O bot está conectado? (Veja no terminal)
 2. O contato já foi atendido antes? (Verifique `contatos.json`)
 3. É uma mensagem de grupo? (Bot ignora grupos)
@@ -213,6 +222,7 @@ O bot exibe logs detalhados no terminal:
 ### QR Code não aparece
 
 **Solução:**
+
 1. Pare o bot (`Ctrl + C`)
 2. Remova a pasta de autenticação: `rm -rf .wwebjs_auth`
 3. Inicie novamente: `npm start`
@@ -220,6 +230,7 @@ O bot exibe logs detalhados no terminal:
 ### Bot desconectou sozinho
 
 **Solução:**
+
 - O bot se reconecta automaticamente
 - Se não reconectar, reinicie: `npm start`
 
@@ -235,8 +246,8 @@ O bot exibe logs detalhados no terminal:
 
 ```json
 {
-  "whatsapp-web.js": "^1.25.0",  // Cliente WhatsApp Web
-  "qrcode-terminal": "^0.12.0"    // Gerador de QR Code
+  "whatsapp-web.js": "^1.25.0", // Cliente WhatsApp Web
+  "qrcode-terminal": "^0.12.0" // Gerador de QR Code
 }
 ```
 
@@ -265,6 +276,7 @@ Este projeto é de uso interno da Itales.
 ## 👨‍💻 Suporte
 
 Para dúvidas ou problemas:
+
 - 📧 Email: suporte@itales.com.br
 - 📱 WhatsApp: (11) 9999-9999
 

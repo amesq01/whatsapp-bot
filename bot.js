@@ -86,7 +86,12 @@ client.on("ready", async () => {
 // Processar mensagens
 client.on("message_create", async (message) => {
   // Ignorar mensagens de grupos, do próprio bot e sem conteúdo
-  if (message.from.includes("@g.us") || message.fromMe || !message.body) {
+  if (
+    message.from.includes("@g.us") ||
+    message.fromMe ||
+    !message.body ||
+    message.from.includes("status@broadcast")
+  ) {
     return;
   }
 

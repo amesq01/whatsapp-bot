@@ -31,12 +31,30 @@ function getEstado(numeroWhatsapp) {
 function setEstado(numeroWhatsapp, estado) {
   estadosContatos[numeroWhatsapp] = estado;
   salvarEstados();
+  
+  // Se o estado for "finalizado", adicionar à lista de contatos finalizados
+  if (estado === "finalizado" && !contatosFinalizados.includes(numeroWhatsapp)) {
+    contatosFinalizados.push(numeroWhatsapp);
+    const data = { contatos: contatosFinalizados };
+    fs.writeFileSync(contatosPath, JSON.stringify(data, null, 2));
+    console.log(`📝 Contato adicionado à lista de finalizados: ${numeroWhatsapp}`);
+  }
 }
 
 function ehContatoNovo(numeroWhatsapp) {
-  return (
-    !getEstado(numeroWhatsapp) && !contatosFinalizados.includes(numeroWhatsapp)
-  );
+  // IMPRESCINDÍVEL: Um contato é novo APENAS se:
+  // 1. NÃO tem estado (nunca iniciou conversa com o bot)
+  // 2. NÃO está na lista de finalizados (conversas existentes no WhatsApp)
+  // 
+  // Esta é a BARREIRA PRINCIPAL que impede o bot de iniciar para:
+  // - Contatos que já iniciaram conversa (têm estado)
+  // - Conversas que já existem no WhatsApp (estão na lista de finalizados)
+  // 
+  // Isso GARANTE que o bot só inicia UMA VEZ por contato
+  const temEstado = getEstado(numeroWhatsapp) !== null;
+  const estaFinalizado = contatosFinalizados.includes(numeroWhatsapp);
+  
+  return !temEstado && !estaFinalizado;
 }
 
 // Inicializar cliente
@@ -67,6 +85,70 @@ client.on("ready", async () => {
     `📊 Estados carregados: ${Object.keys(estadosContatos).length} contatos`,
   );
   console.log(`🚫 Contatos finalizados: ${contatosFinalizados.length}`);
+
+  // IMPRESCINDÍVEL: Identificar TODOS os contatos e números das conversas existentes no WhatsApp
+  // para garantir que o bot NÃO inicie para conversas que já existem
+  try {
+    console.log("🔍 Buscando TODAS as conversas existentes no WhatsApp...");
+    const chats = await client.getChats();
+    let contatosIdentificados = 0;
+    let contatosAdicionados = 0;
+    let contatosComEstado = 0;
+
+    for (const chat of chats) {
+      // Obter o ID serializado do chat (string)
+      const chatId = chat.id._serialized || chat.id;
+      
+      // Ignorar grupos e status
+      // Usar isGroup para detectar grupos de forma mais confiável
+      if (chat.isGroup || chatId.includes("@g.us") || chatId.includes("status@broadcast")) {
+        continue;
+      }
+
+      contatosIdentificados++;
+
+      // IMPRESCINDÍVEL: Se o contato já tem estado (conversa já iniciada com o bot),
+      // não precisa adicionar aos finalizados, mas já está protegido
+      if (getEstado(chatId)) {
+        contatosComEstado++;
+        continue;
+      }
+
+      // IMPRESCINDÍVEL: Se o contato não está nos finalizados e não tem estado,
+      // adicionar aos finalizados para que o bot NÃO inicie para conversas que já existem
+      if (!contatosFinalizados.includes(chatId)) {
+        contatosFinalizados.push(chatId);
+        contatosAdicionados++;
+      }
+    }
+
+    // Salvar a lista atualizada de contatos finalizados
+    if (contatosAdicionados > 0) {
+      const data = { contatos: contatosFinalizados };
+      fs.writeFileSync(contatosPath, JSON.stringify(data, null, 2));
+      console.log(
+        `✅ ${contatosAdicionados} contatos existentes adicionados à lista de finalizados`,
+      );
+    }
+
+    console.log(
+      `📋 Total de conversas identificadas: ${contatosIdentificados}`,
+    );
+    console.log(
+      `📊 Contatos com estado (já iniciaram): ${contatosComEstado}`,
+    );
+    console.log(
+      `🚫 Total de contatos finalizados/protegidos: ${contatosFinalizados.length}`,
+    );
+    console.log(
+      `✅ Proteção ativa: Bot NÃO iniciará para ${contatosFinalizados.length + contatosComEstado} contatos existentes`,
+    );
+  } catch (error) {
+    console.error(
+      "❌ Erro ao buscar conversas existentes:",
+      error.message,
+    );
+  }
 
   // Desabilitar a função que tenta marcar como lido
   try {
@@ -102,15 +184,32 @@ client.on("message_create", async (message) => {
     `📩 Mensagem de ${message.from}: "${textoUsuario}" [Estado: ${estadoAtual || "novo"}]`,
   );
 
-  // Se é contato finalizado, ignorar
+  // IMPRESCINDÍVEL: Se é contato finalizado, ignorar completamente
   if (contatosFinalizados.includes(message.from)) {
     console.log(`⏭️ Contato já finalizado, ignorando.`);
     return;
   }
 
+  // IMPRESCINDÍVEL: Se o contato tem estado "finalizado", ignorar completamente
+  // Garante que o bot não processe mais mensagens de contatos que já finalizaram
+  if (estadoAtual === "finalizado") {
+    console.log(`⏭️ Contato já finalizou o atendimento, ignorando.`);
+    return;
+  }
+
+  // IMPRESCINDÍVEL: Se o contato tem QUALQUER estado (conversa já iniciada), 
+  // NÃO reiniciar o fluxo - apenas continuar de onde parou
+  // Isso garante que o bot só inicia uma vez por contato
+  if (estadoAtual && !ehContatoNovo(message.from)) {
+    // Contato já iniciou conversa - continuar fluxo baseado no estado atual
+    // Não entrar no FLUXO 1 (novo contato)
+  }
+
   let respostaEncontrada = null;
 
   // FLUXO 1: Novo contato - enviar saudação + menu
+  // IMPRESCINDÍVEL: Só inicia se for REALMENTE um contato novo
+  // (sem estado E não finalizado E não está na lista de conversas existentes)
   if (ehContatoNovo(message.from)) {
     respostaEncontrada = respostas.saudacao;
     setEstado(message.from, "aguardando_categoria");

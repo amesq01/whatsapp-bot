@@ -21,28 +21,18 @@ if (fs.existsSync(contatosPath)) {
 }
 
 // ============================================
-// CONFIGURAÇÃO DO ADMINISTRADOR
+// PAUSAR / RETOMAR BOT — Mensagem para si mesmo
 // ============================================
-const NUMERO_ADMIN = process.env.ADMIN_NUMBER || "559981492561@c.us";
+// Use /pausarbot e /ligarbot no seu chat "Mensagem para si mesmo" do WhatsApp.
+// Seu número (id do chat). Formato: 559981492561@c.us
+const NUMERO_ADMIN = process.env.ADMIN_NUMBER || "559984563966@c.us";
 
-// Sistema de pausa do bot
 const pausaPath = "./bot_pausado.json";
 let botPausado = false;
-
-// Carregar estado de pausa
-if (fs.existsSync(pausaPath)) {
-  try {
-    const data = JSON.parse(fs.readFileSync(pausaPath, "utf-8"));
-    botPausado = data.pausado || false;
-  } catch (e) {
-    console.log("⚠️ Erro ao carregar estado de pausa, iniciando como ativo");
-    botPausado = false;
-  }
-}
+// Bot sempre inicia LIGADO ao conectar (QR code ou reinício). Não carrega estado do arquivo.
 
 function salvarEstadoPausa() {
-  const data = { pausado: botPausado };
-  fs.writeFileSync(pausaPath, JSON.stringify(data, null, 2));
+  fs.writeFileSync(pausaPath, JSON.stringify({ pausado: botPausado }, null, 2));
 }
 
 function salvarEstados() {
@@ -67,18 +57,12 @@ function setEstado(numeroWhatsapp, estado) {
 }
 
 function ehContatoNovo(numeroWhatsapp) {
-  // IMPRESCINDÍVEL: Um contato é novo APENAS se:
+  // IMPRESCINDÍVEL: Bot NUNCA inicia para contatos/conversas já existentes ou já iniciadas.
+  // Um contato é novo APENAS se:
   // 1. NÃO tem estado (nunca iniciou conversa com o bot)
   // 2. NÃO está na lista de finalizados (conversas existentes no WhatsApp)
-  // 
-  // Esta é a BARREIRA PRINCIPAL que impede o bot de iniciar para:
-  // - Contatos que já iniciaram conversa (têm estado)
-  // - Conversas que já existem no WhatsApp (estão na lista de finalizados)
-  // 
-  // Isso GARANTE que o bot só inicia UMA VEZ por contato
   const temEstado = getEstado(numeroWhatsapp) !== null;
   const estaFinalizado = contatosFinalizados.includes(numeroWhatsapp);
-
   return !temEstado && !estaFinalizado;
 }
 
@@ -110,23 +94,10 @@ client.on("ready", async () => {
     `📊 Estados carregados: ${Object.keys(estadosContatos).length} contatos`,
   );
   console.log(`🚫 Contatos finalizados: ${contatosFinalizados.length}`);
-
-  // Status do bot
   if (botPausado) {
-    console.log(`⏸️ Bot está PAUSADO - não responderá mensagens`);
-    if (NUMERO_ADMIN) {
-      console.log(`👤 Administrador configurado: ${NUMERO_ADMIN}`);
-      console.log(`💡 Use /ligarbot no WhatsApp para reativar o bot`);
-    } else {
-      console.log(`⚠️ ATENÇÃO: Número do administrador não configurado!`);
-      console.log(`⚠️ Defina NUMERO_ADMIN no código ou use variável de ambiente ADMIN_NUMBER`);
-    }
+    console.log(`⏸️ Bot PAUSADO — Use /ligarbot no seu chat (mensagem para si mesmo) para retomar.`);
   } else {
-    console.log(`▶️ Bot está ATIVO - respondendo mensagens normalmente`);
-    if (NUMERO_ADMIN) {
-      console.log(`👤 Administrador configurado: ${NUMERO_ADMIN}`);
-      console.log(`💡 Comandos disponíveis: /pausarbot ou /ligarbot`);
-    }
+    console.log(`▶️ Bot ATIVO — Comandos no seu chat: /pausarbot ou /ligarbot`);
   }
 
   // IMPRESCINDÍVEL: Identificar TODOS os contatos e números das conversas existentes no WhatsApp
@@ -142,9 +113,13 @@ client.on("ready", async () => {
       // Obter o ID serializado do chat (string)
       const chatId = chat.id._serialized || chat.id;
 
-      // Ignorar grupos e status
-      // Usar isGroup para detectar grupos de forma mais confiável
-      if (chat.isGroup || chatId.includes("@g.us") || chatId.includes("status@broadcast")) {
+      // Ignorar grupos, status e o próprio chat (mensagem para si mesmo)
+      if (
+        chat.isGroup ||
+        chatId.includes("@g.us") ||
+        chatId.includes("status@broadcast") ||
+        chatId === NUMERO_ADMIN
+      ) {
         continue;
       }
 
@@ -210,87 +185,77 @@ client.on("ready", async () => {
 
 // Processar mensagens
 client.on("message_create", async (message) => {
-  // Ignorar mensagens de grupos, do próprio bot e sem conteúdo
   if (
     message.from.includes("@g.us") ||
-    message.fromMe ||
-    !message.body ||
-    message.from.includes("status@broadcast")
+    message.from.includes("status@broadcast") ||
+    !message.body
   ) {
     return;
   }
 
   const textoUsuario = message.body.trim().toLowerCase();
-  const estadoAtual = getEstado(message.from);
-  const ehAdmin = NUMERO_ADMIN && message.from === NUMERO_ADMIN;
 
+  // --- COMANDOS PAUSAR/RETOMAR (mensagem para si mesmo) ---
+  // Processar ANTES de ignorar fromMe: quando você manda no seu chat, fromMe = true.
+  if (message.from === NUMERO_ADMIN) {
+    if (textoUsuario === "/pausarbot") {
+      botPausado = true;
+      salvarEstadoPausa();
+      try {
+        await client.sendMessage(
+          message.from,
+          "⏸️ *Bot pausado.*\n\nO bot não responderá até você enviar /ligarbot neste chat.",
+        );
+      } catch (e) {
+        console.error("Erro ao enviar confirmação de pausa:", e.message);
+      }
+      console.log("⏸️ Bot pausado pelo admin (mensagem para si mesmo)");
+      return;
+    }
+    if (textoUsuario === "/ligarbot") {
+      botPausado = false;
+      salvarEstadoPausa();
+      try {
+        await client.sendMessage(
+          message.from,
+          "▶️ *Bot ligado.*\n\nO bot voltou a responder normalmente.",
+        );
+      } catch (e) {
+        console.error("Erro ao enviar confirmação de ligar:", e.message);
+      }
+      console.log("▶️ Bot ligado pelo admin (mensagem para si mesmo)");
+      return;
+    }
+    // Qualquer outra mensagem no seu chat (mensagem para si mesmo): ignorar
+    return;
+  }
+
+  // Ignorar mensagens enviadas por você em outros chats
+  if (message.fromMe) {
+    return;
+  }
+
+  // Bot pausado: ignorar todas as mensagens (comandos já foram tratados acima)
+  if (botPausado) {
+    console.log(`⏸️ Bot pausado — mensagem ignorada de ${message.from}`);
+    return;
+  }
+
+  const estadoAtual = getEstado(message.from);
   console.log(
     `📩 Mensagem de ${message.from}: "${textoUsuario}" [Estado: ${estadoAtual || "novo"}]`,
   );
 
-  // COMANDOS DE ADMINISTRADOR (funcionam mesmo com bot pausado)
-  const ehComandoAdmin = textoUsuario === "/pausarbot" ||
-    textoUsuario === "/ligarbot";
+  // IMPRESCINDÍVEL: Bot NUNCA inicia para contatos/conversas já existentes ou já iniciadas
 
-  if (ehComandoAdmin) {
-    // Verificar se é o administrador autorizado
-    if (!ehAdmin) {
-      await client.sendMessage(
-        message.from,
-        "🚫 *Acesso Negado*\n\nApenas o administrador pode usar este comando.",
-      );
-      console.log(`🚫 Tentativa de usar comando admin de número não autorizado: ${message.from}`);
-      return;
-    }
-
-    if (textoUsuario === "/pausarbot") {
-      botPausado = true;
-      salvarEstadoPausa();
-      await client.sendMessage(
-        message.from,
-        "⏸️ *Bot pausado*\n\nO bot não responderá mais mensagens até ser ligado novamente.\n\nUse /ligarbot para reativar.",
-      );
-      console.log("⏸️ Bot pausado pelo administrador");
-      return;
-    }
-
-    if (textoUsuario === "/ligarbot") {
-      botPausado = false;
-      salvarEstadoPausa();
-      await client.sendMessage(
-        message.from,
-        "▶️ *Bot ligado*\n\nO bot voltou a responder mensagens normalmente.",
-      );
-      console.log("▶️ Bot ligado pelo administrador");
-      return;
-    }
-  }
-
-  // Se o bot está pausado, ignorar todas as mensagens (exceto comandos do admin acima)
-  if (botPausado) {
-    console.log(`⏸️ Bot pausado - mensagem ignorada de ${message.from}`);
-    return;
-  }
-
-  // IMPRESCINDÍVEL: Se é contato finalizado, ignorar completamente
   if (contatosFinalizados.includes(message.from)) {
-    console.log(`⏭️ Contato já finalizado, ignorando.`);
+    console.log(`⏭️ Contato já finalizado ou conversa existente — ignorando.`);
     return;
   }
 
-  // IMPRESCINDÍVEL: Se o contato tem estado "finalizado", ignorar completamente
-  // Garante que o bot não processe mais mensagens de contatos que já finalizaram
   if (estadoAtual === "finalizado") {
-    console.log(`⏭️ Contato já finalizou o atendimento, ignorando.`);
+    console.log(`⏭️ Contato já finalizou o atendimento — ignorando.`);
     return;
-  }
-
-  // IMPRESCINDÍVEL: Se o contato tem QUALQUER estado (conversa já iniciada), 
-  // NÃO reiniciar o fluxo - apenas continuar de onde parou
-  // Isso garante que o bot só inicia uma vez por contato
-  if (estadoAtual && !ehContatoNovo(message.from)) {
-    // Contato já iniciou conversa - continuar fluxo baseado no estado atual
-    // Não entrar no FLUXO 1 (novo contato)
   }
 
   let respostaEncontrada = null;

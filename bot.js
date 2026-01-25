@@ -25,7 +25,7 @@ if (fs.existsSync(contatosPath)) {
 // ============================================
 // Use /pausarbot e /ligarbot no seu chat "Mensagem para si mesmo" do WhatsApp.
 // Seu número (id do chat). Formato: 559981492561@c.us
-const NUMERO_ADMIN = process.env.ADMIN_NUMBER || "559984563966@c.us";
+const NUMERO_ADMIN = process.env.ADMIN_NUMBER || "553199650013@c.us";
 
 const pausaPath = "./bot_pausado.json";
 let botPausado = false;

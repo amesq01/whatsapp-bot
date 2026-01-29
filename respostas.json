@@ -1,5 +1,5 @@
 {
-  "saudacao": "Olá! 👋 Seja bem-vindo(a) a Itales, me conte mais o que você busca!\n\n📋 MENU PRINCIPAL\n\nDigite:\n1️⃣ - Relógios\n2️⃣ - Imóveis\n3️⃣ - Veículos\n4️⃣ - Investimentos\n",
+  "saudacao": "Olá! 👋 Seja bem-vindo(a) a Itales, me conte mais o que você busca!\n\nDigite o número da opção:\n\n1️⃣ - Relógios\n2️⃣ - Imóveis\n3️⃣ - Veículos\n4️⃣ - Investimentos\n",
   "categorias": {
     "1": "🕐 Relógios",
     "2": "🏠 Imóveis",

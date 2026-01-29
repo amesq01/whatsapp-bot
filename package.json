@@ -1,16 +1,16 @@
 {
-  "name": "whatsapp-bot",
+  "name": "assistant-whatsapp",
   "version": "1.0.0",
-  "description": "Bot de WhatsApp Business com respostas predefinidas",
-  "main": "bot.js",
+  "description": "Assistant de WhatsApp Business com respostas predefinidas",
+  "main": "assistant-whatsapp.js",
   "scripts": {
-    "start": "node bot.js",
-    "dev": "nodemon bot.js"
+    "start": "node assistant-whatsapp.js",
+    "dev": "nodemon assistant-whatsapp.js"
   },
   "keywords": [
     "whatsapp",
-    "bot",
-    "chatbot"
+    "assistant",
+    "assistant-whatsapp"
   ],
   "author": "",
   "license": "ISC",

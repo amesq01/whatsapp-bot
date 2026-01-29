@@ -21,18 +21,18 @@ if (fs.existsSync(contatosPath)) {
 }
 
 // ============================================
-// PAUSAR / RETOMAR BOT — Mensagem para si mesmo
+// PAUSAR / RETOMAR ZAP — Mensagem para si mesmo
 // ============================================
-// Use /pausarbot e /ligarbot no seu chat "Mensagem para si mesmo" do WhatsApp.
+// Use /pausarzap e /ligarzap no seu chat "Mensagem para si mesmo" do WhatsApp.
 // Seu número (id do chat). Formato: 559981492561@c.us
 const NUMERO_ADMIN = process.env.ADMIN_NUMBER || "553199650013@c.us";
 
-const pausaPath = "./bot_pausado.json";
-let botPausado = false;
-// Bot sempre inicia LIGADO ao conectar (QR code ou reinício). Não carrega estado do arquivo.
+const pausaPath = "./zap_pausado.json";
+let zapPausado = false;
+// assistant sempre inicia LIGADO ao conectar (QR code ou reinício). Não carrega estado do arquivo.
 
 function salvarEstadoPausa() {
-  fs.writeFileSync(pausaPath, JSON.stringify({ pausado: botPausado }, null, 2));
+  fs.writeFileSync(pausaPath, JSON.stringify({ pausado: zapPausado }, null, 2));
 }
 
 function salvarEstados() {
@@ -57,9 +57,9 @@ function setEstado(numeroWhatsapp, estado) {
 }
 
 function ehContatoNovo(numeroWhatsapp) {
-  // IMPRESCINDÍVEL: Bot NUNCA inicia para contatos/conversas já existentes ou já iniciadas.
+  // IMPRESCINDÍVEL: Assistant NUNCA inicia para contatos/conversas já existentes ou já iniciadas.
   // Um contato é novo APENAS se:
-  // 1. NÃO tem estado (nunca iniciou conversa com o bot)
+  // 1. NÃO tem estado (nunca iniciou conversa com o Assistant)
   // 2. NÃO está na lista de finalizados (conversas existentes no WhatsApp)
   const temEstado = getEstado(numeroWhatsapp) !== null;
   const estaFinalizado = contatosFinalizados.includes(numeroWhatsapp);
@@ -86,7 +86,7 @@ client.on("qr", (qr) => {
 
 // Quando conectar com sucesso
 client.on("ready", async () => {
-  console.log("✅ Bot conectado e pronto!");
+  console.log("✅ Assistant conectado e pronto!");
   console.log("⏰ Aguardando mensagens...");
 
   // Sistema de estados carregado
@@ -94,14 +94,14 @@ client.on("ready", async () => {
     `📊 Estados carregados: ${Object.keys(estadosContatos).length} contatos`,
   );
   console.log(`🚫 Contatos finalizados: ${contatosFinalizados.length}`);
-  if (botPausado) {
-    console.log(`⏸️ Bot PAUSADO — Use /ligarbot no seu chat (mensagem para si mesmo) para retomar.`);
+  if (zapPausado) {
+    console.log(`⏸️ Assistant PAUSADO — Use /ligarzap no seu chat (mensagem para si mesmo) para retomar.`);
   } else {
-    console.log(`▶️ Bot ATIVO — Comandos no seu chat: /pausarbot ou /ligarbot`);
+    console.log(`▶️ Assistant ATIVO — Comandos no seu chat: /pausarzap ou /ligarzap`);
   }
 
   // IMPRESCINDÍVEL: Identificar TODOS os contatos e números das conversas existentes no WhatsApp
-  // para garantir que o bot NÃO inicie para conversas que já existem
+  // para garantir que o assistant NÃO inicie para conversas que já existem
   try {
     console.log("🔍 Buscando TODAS as conversas existentes no WhatsApp...");
     const chats = await client.getChats();
@@ -125,7 +125,7 @@ client.on("ready", async () => {
 
       contatosIdentificados++;
 
-      // IMPRESCINDÍVEL: Se o contato já tem estado (conversa já iniciada com o bot),
+      // IMPRESCINDÍVEL: Se o contato já tem estado (conversa já iniciada com o assistant),
       // não precisa adicionar aos finalizados, mas já está protegido
       if (getEstado(chatId)) {
         contatosComEstado++;
@@ -133,7 +133,7 @@ client.on("ready", async () => {
       }
 
       // IMPRESCINDÍVEL: Se o contato não está nos finalizados e não tem estado,
-      // adicionar aos finalizados para que o bot NÃO inicie para conversas que já existem
+      // adicionar aos finalizados para que o assistant NÃO inicie para conversas que já existem
       if (!contatosFinalizados.includes(chatId)) {
         contatosFinalizados.push(chatId);
         contatosAdicionados++;
@@ -159,7 +159,7 @@ client.on("ready", async () => {
       `🚫 Total de contatos finalizados/protegidos: ${contatosFinalizados.length}`,
     );
     console.log(
-      `✅ Proteção ativa: Bot NÃO iniciará para ${contatosFinalizados.length + contatosComEstado} contatos existentes`,
+      `✅ Proteção ativa: Assistant NÃO iniciará para ${contatosFinalizados.length + contatosComEstado} contatos existentes`,
     );
   } catch (error) {
     console.error(
@@ -198,32 +198,32 @@ client.on("message_create", async (message) => {
   // --- COMANDOS PAUSAR/RETOMAR (mensagem para si mesmo) ---
   // Processar ANTES de ignorar fromMe: quando você manda no seu chat, fromMe = true.
   if (message.from === NUMERO_ADMIN) {
-    if (textoUsuario === "/pausarbot") {
-      botPausado = true;
+    if (textoUsuario === "/pausarzap") {
+      zapPausado = true;
       salvarEstadoPausa();
       try {
         await client.sendMessage(
           message.from,
-          "⏸️ *Bot pausado.*\n\nO bot não responderá até você enviar /ligarbot neste chat.",
+          "⏸️ *Assistant pausado.*\n\nO Assistant não responderá até você enviar /ligarzap neste chat.",
         );
       } catch (e) {
         console.error("Erro ao enviar confirmação de pausa:", e.message);
       }
-      console.log("⏸️ Bot pausado pelo admin (mensagem para si mesmo)");
+      console.log("⏸️ Assistant pausado pelo admin (mensagem para si mesmo)");
       return;
     }
-    if (textoUsuario === "/ligarbot") {
-      botPausado = false;
+    if (textoUsuario === "/ligarzap") {
+      zapPausado = false;
       salvarEstadoPausa();
       try {
         await client.sendMessage(
           message.from,
-          "▶️ *Bot ligado.*\n\nO bot voltou a responder normalmente.",
+          "▶️ *Assistant ligado.*\n\nO Assistant voltou a responder normalmente.",
         );
       } catch (e) {
         console.error("Erro ao enviar confirmação de ligar:", e.message);
       }
-      console.log("▶️ Bot ligado pelo admin (mensagem para si mesmo)");
+      console.log("▶️ Assistant ligado pelo admin (mensagem para si mesmo)");
       return;
     }
     // Qualquer outra mensagem no seu chat (mensagem para si mesmo): ignorar
@@ -235,9 +235,9 @@ client.on("message_create", async (message) => {
     return;
   }
 
-  // Bot pausado: ignorar todas as mensagens (comandos já foram tratados acima)
-  if (botPausado) {
-    console.log(`⏸️ Bot pausado — mensagem ignorada de ${message.from}`);
+  // Assistant pausado: ignorar todas as mensagens (comandos já foram tratados acima)
+  if (zapPausado) {
+    console.log(`⏸️ Assistant pausado — mensagem ignorada de ${message.from}`);
     return;
   }
 
@@ -246,7 +246,7 @@ client.on("message_create", async (message) => {
     `📩 Mensagem de ${message.from}: "${textoUsuario}" [Estado: ${estadoAtual || "novo"}]`,
   );
 
-  // IMPRESCINDÍVEL: Bot NUNCA inicia para contatos/conversas já existentes ou já iniciadas
+  // IMPRESCINDÍVEL: Assistant NUNCA inicia para contatos/conversas já existentes ou já iniciadas
 
   if (contatosFinalizados.includes(message.from)) {
     console.log(`⏭️ Contato já finalizado ou conversa existente — ignorando.`);
@@ -377,8 +377,8 @@ client.on("message_create", async (message) => {
 
 // Tratar desconexão
 client.on("disconnected", (reason) => {
-  console.log("❌ Bot desconectado:", reason);
+  console.log("❌ Assistant desconectado:", reason);
 });
 
-// Iniciar bot
+// Iniciar Assistant
 client.initialize();

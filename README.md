@@ -1,10 +1,10 @@
-# 🤖 Bot WhatsApp Business Itales - Sistema de Atendimento Automatizado
+# 🤖 Assistant WhatsApp Business Itales - Sistema de Atendimento Automatizado
 
-Bot de WhatsApp Business inteligente com fluxo conversacional completo para qualificação de leads e agendamento de atendimentos. Desenvolvido sem IA, utilizando respostas predefinidas e máquina de estados.
+Assistant de WhatsApp Business inteligente com fluxo conversacional completo para qualificação de leads e agendamento de atendimentos. Desenvolvido sem IA, utilizando respostas predefinidas e máquina de estados.
 
 ## 📋 Sobre o Projeto
 
-Sistema de atendimento automatizado para WhatsApp Business focado em qualificação de leads interessados em **Relógios, Imóveis, Veículos e Investimentos**. O bot conduz o cliente através de um fluxo estruturado, coletando informações essenciais antes de transferir para a equipe de vendas.
+Sistema de atendimento automatizado para WhatsApp Business focado em qualificação de leads interessados em **Relógios, Imóveis, Veículos e Investimentos**. O Assistant conduz o cliente através de um fluxo estruturado, coletando informações essenciais antes de transferir para a equipe de vendas.
 
 ## ✨ Funcionalidades
 
@@ -24,19 +24,19 @@ Sistema de atendimento automatizado para WhatsApp Business focado em qualificaç
 ```
 ┌─────────────────────────────────────────┐
 │ 1. Cliente envia QUALQUER mensagem     │
-│    → Bot: Saudação + Menu (1-4)        │
+│    → Assistant: Saudação + Menu (1-4)        │
 └─────────────────┬───────────────────────┘
                   │
 ┌─────────────────▼───────────────────────┐
 │ 2. Cliente escolhe: 1, 2, 3 ou 4       │
-│    → Bot: "✅ Selecionou: [Categoria]"  │
-│    → Bot: "Qual o valor do bem?"        │
+│    → Assistant: "✅ Selecionou: [Categoria]"  │
+│    → Assistant: "Qual o valor do bem?"        │
 └─────────────────┬───────────────────────┘
                   │
 ┌─────────────────▼───────────────────────┐
 │ 3. Cliente informa o valor             │
-│    → Bot: "✅ Valor informado: R$ X"    │
-│    → Bot: "Disponível agora ou agendar?"│
+│    → Assistant: "✅ Valor informado: R$ X"    │
+│    → Assistant: "Disponível agora ou agendar?"│
 └─────────────────┬───────────────────────┘
                   │
         ┌─────────┴─────────┐
@@ -57,8 +57,8 @@ Sistema de atendimento automatizado para WhatsApp Business focado em qualificaç
 ## 📁 Estrutura do Projeto
 
 ```
-chatbot/
-├── bot.js                    # Código principal do bot
+chatAssistant/
+├── Assistant.js                    # Código principal do Assistant
 ├── respostas.json            # Configuração de mensagens e fluxo
 ├── estados_contatos.json     # Estados de cada contato (gerado automaticamente)
 ├── contatos.json             # Lista de contatos finalizados
@@ -70,9 +70,9 @@ chatbot/
 
 ### Descrição dos Arquivos
 
-**`bot.js`**
+**`Assistant.js`**
 
-- Motor principal do bot
+- Motor principal do Assistant
 - Gerencia conexão com WhatsApp Web
 - Implementa máquina de estados
 - Controla o fluxo conversacional
@@ -97,7 +97,7 @@ chatbot/
 **`contatos.json`**
 
 - Lista de contatos que já foram atendidos
-- Bot não responde contatos desta lista
+- Assistant não responde contatos desta lista
 
 ## 🚀 Instalação
 
@@ -115,7 +115,7 @@ chatbot/
 npm install
 ```
 
-2. **Inicie o bot:**
+2. **Inicie o Assistant:**
 
 ```bash
 npm start
@@ -128,7 +128,7 @@ npm start
    - Clique em **Conectar aparelho**
    - Escaneie o QR Code do terminal
 
-4. **Pronto!** O bot está funcionando ✅
+4. **Pronto!** O Assistant está funcionando ✅
 
 ## 🎨 Personalização
 
@@ -152,7 +152,7 @@ Edite o arquivo **`respostas.json`**:
 
 ### Resetar Contatos Atendidos
 
-Para permitir que o bot responda contatos antigos novamente:
+Para permitir que o Assistant responda contatos antigos novamente:
 
 ```bash
 # Limpar lista de contatos finalizados
@@ -178,7 +178,7 @@ echo '{}' > estados_contatos.json
 
 2. Atualize a saudação com a nova opção
 
-3. Adicione a validação no `bot.js`:
+3. Adicione a validação no `Assistant.js`:
 
 ```javascript
 if (["1", "2", "3", "4", "5"].includes(textoUsuario)) {
@@ -187,16 +187,16 @@ if (["1", "2", "3", "4", "5"].includes(textoUsuario)) {
 ## 🛠️ Comandos Disponíveis
 
 ```bash
-npm start          # Inicia o bot
+npm start          # Inicia o Assistant
 npm run dev        # Inicia em modo desenvolvimento (com auto-reload)
 ```
 
 ## 📊 Logs e Monitoramento
 
-O bot exibe logs detalhados no terminal:
+O Assistant exibe logs detalhados no terminal:
 
 ```
-✅ Bot conectado e pronto!
+✅ Assistant conectado e pronto!
 📩 Mensagem de 559981234567@c.us: "oi" [Estado: novo]
 🆕 Novo contato! Estado: aguardando_categoria
 ✅ Resposta enviada
@@ -209,29 +209,29 @@ O bot exibe logs detalhados no terminal:
 
 ### Erro: "Cannot read properties of undefined (reading 'markedUnread')"
 
-**Solução:** Este é um aviso interno do WhatsApp Web. A mensagem é enviada com sucesso mesmo com este erro. O bot já trata isso automaticamente.
+**Solução:** Este é um aviso interno do WhatsApp Web. A mensagem é enviada com sucesso mesmo com este erro. O Assistant já trata isso automaticamente.
 
-### Bot não responde mensagens
+### Assistant não responde mensagens
 
 **Verifique:**
 
-1. O bot está conectado? (Veja no terminal)
+1. O Assistant está conectado? (Veja no terminal)
 2. O contato já foi atendido antes? (Verifique `contatos.json`)
-3. É uma mensagem de grupo? (Bot ignora grupos)
+3. É uma mensagem de grupo? (Assistant ignora grupos)
 
 ### QR Code não aparece
 
 **Solução:**
 
-1. Pare o bot (`Ctrl + C`)
+1. Pare o Assistant (`Ctrl + C`)
 2. Remova a pasta de autenticação: `rm -rf .wwebjs_auth`
 3. Inicie novamente: `npm start`
 
-### Bot desconectou sozinho
+### Assistant desconectou sozinho
 
 **Solução:**
 
-- O bot se reconecta automaticamente
+- O Assistant se reconecta automaticamente
 - Se não reconectar, reinicie: `npm start`
 
 ## 🔒 Segurança e Boas Práticas
@@ -240,7 +240,7 @@ O bot exibe logs detalhados no terminal:
 - ✅ Mantenha backup dos arquivos `contatos.json` e `estados_contatos.json`
 - ✅ Use `.gitignore` para não versionar dados sensíveis
 - ✅ Monitore os logs regularmente
-- ✅ Reinicie o bot diariamente para evitar problemas de memória
+- ✅ Reinicie o Assistant diariamente para evitar problemas de memória
 
 ## 📦 Dependências
 
@@ -253,7 +253,7 @@ O bot exibe logs detalhados no terminal:
 
 ## 🚧 Limitações
 
-- Bot responde apenas contatos novos (primeira interação)
+- Assistant responde apenas contatos novos (primeira interação)
 - Não envia imagens/áudios/arquivos (apenas texto)
 - Não funciona em grupos
 - Requer que o WhatsApp Business fique conectado
@@ -267,7 +267,7 @@ O bot exibe logs detalhados no terminal:
 - [ ] Relatórios de atendimento
 - [ ] Múltiplos atendentes
 - [ ] Horário de funcionamento configurável
-- [ ] Respostas com botões interativos
+- [ ] Respostas com Assistantões interativos
 
 ## 📝 Licença
 
